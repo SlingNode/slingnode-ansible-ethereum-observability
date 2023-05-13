@@ -1,0 +1,93 @@
+{{ ansible_managed | comment }}
+
+version: '3.9'
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+      tag: {% raw %}'observability|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.ID}}'{% endraw %}
+
+
+services:
+
+  filebeat:
+    image: {{ filebeat_docker_image }}
+    container_name: filebeat
+    user: root
+    volumes:
+      - {{ observability_root_path }}/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - {{ observability_root_path }}/filebeat/:/registry:rw
+      - {{ observability_root_path }}/filebeat/data:/usr/share/filebeat/data:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - service_net
+    logging:
+     driver: json-file
+     options:
+      max-size: 10m
+      max-file: "3"
+
+  ethereum-metrics-exporter:
+    restart: "unless-stopped"
+    image: {{ ethereum_metrics_exporter_docker_image }}
+    container_name: ethereum-metrics-exporter
+    ports:
+      - {{ host_ip_address_to_bind_to}}:{{ ethereum_metrics_exporter_port}}:{{ ethereum_metrics_exporter_port }}/tcp
+    command:
+      - --consensus-url={{ consensus_endpoint }}
+      - --execution-url={{ execution_endpoint }}
+      - --metrics-port={{ ethereum_metrics_exporter_port }}
+    <<: *logging
+    networks:
+      - service_net
+
+
+  node-exporter:
+    restart: unless-stopped
+    image: {{ node_exporter_docker_image }}
+    container_name: node-exporter
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      # - '--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|run|var/lib/docker/.+)($|/)'
+      - '--no-collector.ipvs'
+    ports:
+      - {{ host_ip_address_to_bind_to}}:9100:9100/tcp
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+      - /etc/hostname:/etc/nodename:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/localtime:/etc/localtime:ro
+    <<: *logging
+    networks:
+      - service_net
+
+
+  cadvisor:
+    image: {{ cadvisor_docker_image }}
+    container_name: cadvisor
+    ports:
+      - {{ host_ip_address_to_bind_to}}:8080:8080/tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    command:
+      - --docker_only
+      - --housekeeping_interval=30s
+    <<: *logging
+    networks:
+      - service_net
+
+networks:
+  service_net:
+    name: service_net

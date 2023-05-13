@@ -1,0 +1,26 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Include default vars
+      ansible.builtin.include_vars:
+        dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/"
+        extensions:
+          - 'yml'
+
+    - name: Include test containers tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/containers_obs.yml
+
+
+    - name: Include test containers tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/containers_agents.yml
+
+
+    - name: Include test apps tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/health.yml

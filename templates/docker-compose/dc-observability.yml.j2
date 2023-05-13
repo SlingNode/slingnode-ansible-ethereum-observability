@@ -1,0 +1,84 @@
+{{ ansible_managed | comment }}
+
+version: '3.9'
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+      tag: {% raw %}'observability|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.ID}}'{% endraw %}
+
+
+services:
+
+  elk:
+    restart: "unless-stopped"
+    image: {{ elk_docker_image }}
+    container_name: {{ container_name_elk }}
+    ports:
+      - "{{ host_ip_address_to_bind_to }}:5601:5601/tcp"  # Kibana
+      - "{{ host_ip_address_to_bind_to }}:5044:5044/tcp"  # Logstash
+      - "{{ host_ip_address_to_bind_to }}:9200:9200/tcp"  # ElasticSearch API
+      - "{{ host_ip_address_to_bind_to }}:9600:9600/tcp"  # Logstash API
+    volumes:
+      - {{ observability_root_path }}/elk/:/etc/logstash/conf.d/
+      - elk-data:/var/lib/elasticsearch
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - service_net
+    deploy:
+      resources:
+        limits:
+          memory: {{ elk_container_memory_limit }}
+
+  prometheus:
+    restart: "unless-stopped"
+    image: {{ prometheus_docker_image }}
+    container_name: prometheus
+    volumes:
+      - {{ observability_root_path }}/prometheus/prometheus.yml:/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+      # - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/observability/prometheus/sd_all_targets.yml:/prometheus/sd_all_targets.yml:ro
+      - /opt/observability/prometheus/sd_client_targets.yml:/prometheus/sd_client_targets.yml:ro
+    ports:
+      - "{{ host_ip_address_to_bind_to }}:9090:9090/tcp"
+    command:
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/usr/share/prometheus/console_libraries
+      - --web.console.templates=/usr/share/prometheus/consoles
+      - --log.format=json
+    <<: *logging
+    networks:
+      - service_net
+    depends_on:
+      - elk
+
+
+  grafana:
+    restart: "unless-stopped"
+    image: {{ grafana_docker_image }}
+    container_name: grafana
+    ports:
+      - "{{ host_ip_address_to_bind_to }}:3000:3000/tcp"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - {{ observability_root_path }}/grafana/provisioning:/etc/grafana/provisioning
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - prometheus
+    <<: *logging
+    networks:
+      - service_net
+
+networks:
+  service_net:
+    name: service_net
+
+
+volumes:
+  elk-data:
+  grafana-data:
+  prom-data:

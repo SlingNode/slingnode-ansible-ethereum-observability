@@ -1,0 +1,26 @@
+- name: Restart elk container
+  community.docker.docker_container:
+    name: elk
+    state: started
+    restart: true
+
+
+- name: Restart filebeat container
+  community.docker.docker_container:
+    name: filebeat
+    state: started
+    restart: true
+
+
+- name: Restart prometheus container
+  community.docker.docker_container:
+    name: prometheus
+    state: started
+    restart: true
+
+
+- name: Restart grafana container
+  community.docker.docker_container:
+    name: grafana
+    state: started
+    restart: true

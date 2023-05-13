@@ -1,0 +1,46 @@
+---
+- name: Get node-exporter metrics
+  ansible.builtin.uri:
+    url: http://localhost:9100/metrics
+    return_content: true
+    method: GET
+    status_code:
+      - 200
+  register: node_exporter_response
+  retries: 20
+  delay: 3
+  until: "node_exporter_response['status'] == 200"
+
+
+- name: Get Cadvisor metrics
+  ansible.builtin.uri:
+    url: http://localhost:8080/metrics
+    return_content: true
+    method: GET
+    status_code:
+      - 200
+  register: cadvisor_response
+  retries: 20
+  delay: 3
+  until: "cadvisor_response['status'] == 200"
+
+
+- name: Get ethereum-metrics-exporter metrics
+  ansible.builtin.uri:
+    url: http://localhost:9091/metrics
+    return_content: true
+    method: GET
+    status_code:
+      - 200
+  register: ethereum_metrics_exporter
+  retries: 20
+  delay: 3
+  until: "ethereum_metrics_exporter['status'] == 200"
+
+
+- name: Assert expected metrics are present in prometheus response
+  ansible.builtin.assert:
+    that:
+      - "'node_network_up' in node_exporter_response['content']"
+      - "'eth_exe_block_safe_block_size_bytes' in ethereum_metrics_exporter['content']"
+      - "'container_memory_rss' in cadvisor_response['content']"

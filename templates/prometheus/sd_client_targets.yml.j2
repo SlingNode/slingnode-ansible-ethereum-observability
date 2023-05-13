@@ -1,0 +1,37 @@
+{{ ansible_managed | comment }}
+---
+# consensus clients targets
+- targets:
+{% for host in groups['all'] if hostvars[host].clients.consensus is defined %}
+    - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ consensus_client_metrics_port }}
+{% endfor %}
+  labels:
+    job: 'consensus-clients'
+
+
+# execution clients geth
+- targets:
+{% for host in groups['all'] if hostvars[host].clients.execution is defined and hostvars[host].clients.execution is defined == "geth" %}
+    - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ execution_client_metrics_port }}
+{% endfor %}
+  labels:
+    job: 'execution-clients'
+    __metrics_path__: /debug/metrics/prometheus
+
+
+# execution clients nethermind and besu
+- targets:
+{% for host in groups['all'] if hostvars[host].clients.execution is defined %}
+    - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ execution_client_metrics_port }}
+{% endfor %}
+  labels:
+    job: 'execution-clients'
+
+
+# validator clients
+- targets:
+{% for host in groups['all'] if hostvars[host].clients.validator is defined %}
+    - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ validator_client_metrics_port }}
+{% endfor %}
+  labels:
+    job: 'validator-clients'

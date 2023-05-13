@@ -1,0 +1,15 @@
+---
+- name: Verify - monitoring_server and clients
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+
+    - name: Include test containers tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/containers_agents.yml
+
+    - name: Include test agents tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/agents.yml

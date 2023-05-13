@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: "Include observability"
+      ansible.builtin.include_role:
+        name: "slingnode-ansible-ethereum-observability"

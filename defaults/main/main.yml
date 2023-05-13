@@ -1,0 +1,112 @@
+---
+monitoring_server: true
+install_monitoring_agents: true
+single_server_deployment: true
+
+# monitoring server images
+elk_docker_image: sebp/elk:latest
+prometheus_docker_image: prom/prometheus:latest
+grafana_docker_image: grafana/grafana:9.5.1
+
+# monitoring agent images
+filebeat_docker_image: docker.elastic.co/beats/filebeat:8.7.0
+ethereum_metrics_exporter_docker_image: ethpandaops/ethereum-metrics-exporter:latest
+node_exporter_docker_image: quay.io/prometheus/node-exporter:latest
+cadvisor_docker_image: gcr.io/cadvisor/cadvisor:latest
+
+container_name_elk: elk
+
+container_name_consensus: consensus
+container_name_execution: execution
+container_name_validator: validator
+
+# default paths
+observability_root_path: /opt/observability
+observability_docker_compose_path: "{{ observability_root_path }}/observability_dc"
+observability_dir_paths:
+  - "{{ observability_root_path }}"
+  - "{{ observability_root_path }}/elk"
+  - "{{ observability_root_path }}/prometheus"
+  - "{{ observability_root_path }}/grafana/provisioning"
+  - "{{ observability_docker_compose_path }}"
+
+
+agents_dir_paths:
+  - "{{ observability_root_path }}"
+  - "{{ observability_root_path }}/filebeat"
+  - "{{ observability_docker_compose_path }}/agents"
+
+
+packages:
+  - python3-pip
+
+python_modules:
+  - pip>=21.3.1 # pip must be the first module to be installed
+  - setuptools_rust
+  - cryptography
+  - pyopenssl
+  - docker
+  - docker-compose
+
+# clients endpoints
+consensus_client_http_port: 5052
+consensus_endpoint: http://consensus:{{ consensus_client_http_port }}
+execution_client_json_rpc_port: 8545
+execution_endpoint: http://execution:{{ execution_client_json_rpc_port }}
+
+
+execution_client_metrics_port: 6060
+consensus_client_metrics_port: 8008
+validator_client_metrics_port: 8009
+
+node_exporter_port: 9100
+container_advisor_port: 8080
+ethereum_metrics_exporter_port: 9091
+
+logstash_port: 5044
+
+# Max memory to allocate to ELK container
+# ELK container will consume all available memory if not set
+elk_container_memory_limit: 6GB
+
+#  Use the below variable to provide your own Logstash parser config
+logstash_parsers_config:
+  - src: files/01-logstash-pipeline.conf
+    dest: "{{ observability_root_path }}/elk/01-logstash-pipeline.conf"
+
+# Filbeat configuration template
+filebeat_config_template:
+  - src: templates/filebeat/filebeat.yml.j2
+    dest: "{{ observability_root_path }}/filebeat/filebeat.yml"
+
+# Use the below variables to provide your own Prometheus config files:
+prometheus_config_template:
+  - src: templates/prometheus/prometheus.yml.j2
+    dest: "{{ observability_root_path }}/prometheus/prometheus.yml"
+
+# If you customized Prometheus config file and don't use Service Dicovery
+# set this variable to an empty list in your Playbook
+prometheus_service_discovery_target_templates:
+  - src: templates/prometheus/sd_all_targets.yml.j2
+    dest: "{{ observability_root_path }}/prometheus/sd_all_targets.yml"
+  - src: templates/prometheus/sd_client_targets.yml.j2
+    dest: "{{ observability_root_path }}/prometheus/sd_client_targets.yml"
+
+
+# Enabled will add the required rules firewall rules
+# Make sure you do not lose ssh access when enabling it
+# This is meant to be a safe default for anyone who uses the role to deploy on a server that is directly exposed to the internet
+# (for example an OVH bare metal server). It is expected that for more enterprise type of deployments
+# this would be set to false.
+# Refer to [Host firewall]https://docs.slingnode.com/slingnode.ethereum/architecture/security#host-firewall) section for details and notes on SSH port.
+firewall_active: false
+
+
+# By default ports exposed to host (i.e. expose_consensus_client_http_port_to_host) are bound to 127.0.0.1. This means that in order to access them
+# from other hosts a reverse proxy or SSH tunnels must be used. If you want to access the ports without the need for reverse proxy
+# set this variable to 0.0.0.0.
+# NOTE: This should be used with caution and only when running behind a network firewall (or a security group).
+# You should never change this on hosts directly exposed to the internet since the host firewall (firewalld or ufw)
+# do not control access to ports managed by docker. For details see https://docs.docker.com/network/iptables/.
+# See documentation for more details: TODO: link to our docs
+host_ip_address_to_bind_to: 127.0.0.1

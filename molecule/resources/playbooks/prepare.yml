@@ -1,0 +1,19 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  gather_facts: true
+
+
+  vars:
+    docker_package_state: present
+    docker_install_compose_plugin: true
+
+    # skipping firewall set up to reduce time it takes to run the tests
+    enable_firewall: false
+
+
+  tasks:
+    - name: Install docker
+      ansible.builtin.include_role:
+        name: geerlingguy.docker

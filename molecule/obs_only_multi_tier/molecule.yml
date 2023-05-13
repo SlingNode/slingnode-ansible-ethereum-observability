@@ -1,0 +1,149 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements_dev.yml
+    requirements-file: requirements.yml
+    force: ${SLINGNODE_FORCE:-true}
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: true
+  cachier: machine
+  parallel: true
+  default_box: '${SLINGNODE_BOX:-generic/ubuntu2004}'
+
+platforms:
+  - name: slingnode-test-01
+    hostname: slingnode-test-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 8192
+    cpus: 8
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+    groups:
+      - monitoring_server
+
+  - name: slingnode-test-02
+    hostname: slingnode-test-02
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 8192
+    cpus: 8
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+    groups:
+      - client_servers
+      - consensus_clients
+
+  - name: slingnode-test-03
+    hostname: slingnode-test-03
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 8192
+    cpus: 8
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+    groups:
+      - client_servers
+      - execution_clients
+
+
+  - name: slingnode-test-04
+    hostname: slingnode-test-04
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 8192
+    cpus: 8
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+    groups:
+      - client_servers
+      - validator_clients
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_PIPELINING: "True"
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    prepare: ../resources/playbooks/prepare.yml
+  inventory:
+    group_vars:
+      all:
+        monitoring_server_host: "{{ hostvars[groups['monitoring_server'][0]]['ansible_facts']['default_ipv4']['address'] }}"
+        single_server_deployment: false
+      client_servers:
+        monitoring_server: false
+        install_monitoring_agents: true
+        host_ip_address_to_bind_to: 0.0.0.0
+
+      consensus_clients:
+        deploy_execution: false
+        deploy_consensus: true
+        deploy_validator: false
+
+        clients:
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+      execution_clients:
+        deploy_execution: true
+        deploy_consensus: false
+        deploy_validator: false
+
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
+      validator_clients:
+        deploy_execution: false
+        deploy_consensus: false
+        deploy_validator: true
+
+        clients:
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
+      monitoring_server:
+        monitoring_server: true
+        install_monitoring_agents: false
+        host_ip_address_to_bind_to: 0.0.0.0
+
+
+verifier:
+  name: ansible
+
+
+scenario:
+  name: obs_only_multi_tier
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

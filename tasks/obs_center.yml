@@ -1,0 +1,73 @@
+---
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0700'
+  loop: "{{ observability_dir_paths }}"
+
+
+- name: Set kernel param required by ELK
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: true
+
+
+- name: Copy Prometheus config file
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0755'
+  loop: "{{ prometheus_config_template }}"
+  notify:
+    - Restart prometheus container
+
+
+- name: Copy Prometheus service discover target configs
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0755'
+  loop: "{{ prometheus_service_discovery_target_templates }}"
+  when: prometheus_service_discovery_target_templates and not single_server_deployment | bool
+  notify:
+    - Restart prometheus container
+
+
+- name: Copy Logstash config file
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0755'
+  loop: "{{ logstash_parsers_config }}"
+  notify:
+    - Restart elk container
+
+
+- name: Provision Grafana
+  ansible.posix.synchronize:
+    src: files/grafana/provisioning/
+    dest: "{{ observability_root_path }}/grafana/provisioning"
+    mode: push
+  notify:
+    - Restart grafana container
+
+
+- name: Copy docker-compose files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop:
+    - src: templates/docker-compose/dc-observability.yml.j2
+      dest: "{{ observability_docker_compose_path }}/dc-observability.yml"
+
+
+- name: Start observability stack
+  community.docker.docker_compose:
+    project_src: "{{ observability_docker_compose_path }}"
+    files:
+      - dc-observability.yml
+    remove_orphans: true

@@ -1,0 +1,49 @@
+filebeat.registry.path: /registry
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        # Teku, Besu and Nethermind throw multiline exceptions, Filebeat needs multiline config to handle it
+        - condition:
+            or:
+              - equals:
+                  docker.container.labels.slingnode_client: besu
+              - equals:
+                  docker.container.labels.slingnode_client: nethermind
+              - equals:
+                  docker.container.labels.slingnode_client: teku
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              multiline.type: pattern
+              multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+              multiline.negate: true
+              multiline.match: after
+              fields:
+                log_type: docker
+              fields_under_root: true
+        - condition:
+            or:
+              - equals:
+                  docker.container.labels.slingnode_client: geth
+              - equals:
+                  docker.container.labels.slingnode_client: erigon
+              - equals:
+                  docker.container.labels.slingnode_layer: consensus
+              - equals:
+                  docker.container.labels.slingnode_layer: validator
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              fields:
+                log_type: docker
+              fields_under_root: true
+
+
+output.logstash:
+  hosts: ["{{ container_name_elk if single_server_deployment else monitoring_server_host }}:{{ logstash_port }}"]
+  enabled: true
+  timeout: 15

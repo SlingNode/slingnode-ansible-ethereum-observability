@@ -1,0 +1,36 @@
+---
+# Installation of monitoring agents on remote targets
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0700'
+  loop: "{{ agents_dir_paths }}"
+
+
+- name: Copy docker-compose files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop: "{{ filebeat_config_template }}"
+  notify:
+    - Restart filebeat container
+
+
+- name: Copy docker-compose files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop:
+    - src: templates/docker-compose/dc-observability-agents.yml.j2
+      dest: "{{ observability_docker_compose_path }}/agents/dc-observability-agents.yml"
+
+
+- name: Start observability agents stack
+  community.docker.docker_compose:
+    project_src: "{{ observability_docker_compose_path }}/agents"
+    files:
+      - dc-observability-agents.yml
+    remove_orphans: true

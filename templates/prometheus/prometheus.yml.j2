@@ -1,0 +1,84 @@
+# Prometheus scrape conf is always present for both single_srv and multi_tier
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+    - targets: ['prometheus:9090']
+
+{% if single_server_deployment %}
+# single server deployment Targets are containers accessed over docker net
+# node-exporter not required in single server deploy, Prom already does that -confirm wit Javier
+  # - job_name: 'node_exporter'
+  #   scrape_interval: 5s
+  #   static_configs:
+  #     - targets: ['node-exporter:{{ node_exporter_port }}']
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:{{ container_advisor_port }}']
+  - job_name: 'ethereum-metrics-exporter'
+    static_configs:
+      - targets: ['ethereum-metrics-exporter:{{ ethereum_metrics_exporter_port }}']
+{% if clients.execution is defined %}
+  - job_name: 'execution'
+    metrics_path: {{ '/metrics' if clients.execution == 'nethermind' or clients.execution == 'besu' else '/debug/metrics/prometheus' }}
+    static_configs:
+      - targets: ['{{ container_name_execution }}:{{ execution_client_metrics_port }}']
+{% endif %}
+{% if clients.consensus is defined %}
+  - job_name: 'consensus'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['{{ container_name_consensus }}:{{ consensus_client_metrics_port }}']
+{% endif %}
+{% if clients.validator is defined %}
+  - job_name: 'validator'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['{{ container_name_validator }}:{{ validator_client_metrics_port }}']
+{% endif %}
+# If we hit else this means this is multi tier deployment and we need the dynamic config
+{% else %}
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    file_sd_configs:
+    - files:
+      - 'sd_all_targets.yml' #This path is relative
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        target_label: __address__
+        replacement:   '${1}:9100'
+  - job_name: 'cadvisor'
+    file_sd_configs:
+    - files:
+      - 'sd_all_targets.yml' #This path is relative
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        target_label: __address__
+        replacement:   '${1}:8080'
+  - job_name: 'ethereum-metrics-exporter'
+    file_sd_configs:
+    - files:
+      - 'sd_all_targets.yml' #This path is relative
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        target_label: __address__
+        replacement:   '${1}:{{ ethereum_metrics_exporter_port }}'
+
+  - job_name: 'clients'
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__job__]
+        target_label: job
+    file_sd_configs:
+    - files:
+      - 'sd_client_targets.yml' #This path is relative
+{% endif %}

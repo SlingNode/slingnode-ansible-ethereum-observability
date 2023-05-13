@@ -1,0 +1,75 @@
+---
+- name: Gather os specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+
+- name: Install required software packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "{{ packages }}"
+    - "{{ os_specific_packages | default([]) }}"
+
+
+- name: Install required Python modules
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3
+    state: present
+  loop: "{{ python_modules }}"
+
+
+- name: Import monitoring server configuration tasks
+  ansible.builtin.import_tasks: obs_center.yml
+  when: monitoring_server | bool
+
+
+- name: Import monitoring agents configuration tasks
+  ansible.builtin.import_tasks: agents.yml
+  when: install_monitoring_agents | bool
+
+
+- name: Reset permissions on ELK directory
+  ansible.builtin.file:
+    path: "{{ observability_root_path }}/elk"
+    state: directory
+    mode: '0755'
+    recurse: true
+  when: monitoring_server | bool
+
+
+# Configure firewall rules for RedHat based OS
+- name: Allow required connectivity for agents Redhat based
+  ansible.posix.firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    state: enabled
+    permanent: true
+  loop:
+    - { port: "{{ node_exporter_port }}/tcp" }
+    - { port: "{{ container_advisor_port }}/tcp" }
+    - { port: "{{ ethereum_metrics_exporter_port }}/tcp" }
+    - { port: "{{ execution_client_metrics_port }}/tcp" }
+    - { port: "{{ consensus_client_metrics_port }}/tcp" }
+    - { port: "{{ validator_client_metrics_port }}/tcp" }
+  when: ansible_os_family == 'RedHat' and firewall_active | bool
+
+
+# Configure firewall rules for Debian based OS
+- name: Allow required connectivity for agents Debian based
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ node_exporter_port }}", proto: tcp, rule: allow }
+    - { port: "{{ container_advisor_port }}", proto: tcp, rule: allow }
+    - { port: "{{ ethereum_metrics_exporter_port }}", proto: tcp, rule: allow }
+    - { port: "{{ execution_client_metrics_port }}", proto: tcp, rule: allow }
+    - { port: "{{ consensus_client_metrics_port }}", proto: tcp, rule: allow }
+    - { port: "{{ validator_client_metrics_port }}", proto: tcp, rule: allow }
+  when: ansible_os_family == 'Debian' and firewall_active | bool

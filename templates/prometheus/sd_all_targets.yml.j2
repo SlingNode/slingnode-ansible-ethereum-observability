@@ -1,0 +1,6 @@
+{{ ansible_managed | comment }}
+---
+- targets:
+{% for host in groups['all'] if hostvars[host]['install_monitoring_agents'] | bool %}
+    - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}
+{% endfor %}
