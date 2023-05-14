@@ -16,6 +16,13 @@ services:
     image: {{ filebeat_docker_image }}
     container_name: filebeat
     user: root
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     volumes:
       - {{ observability_root_path }}/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - {{ observability_root_path }}/filebeat/:/registry:rw
@@ -34,6 +41,13 @@ services:
     restart: "unless-stopped"
     image: {{ ethereum_metrics_exporter_docker_image }}
     container_name: ethereum-metrics-exporter
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     ports:
       - {{ host_ip_address_to_bind_to}}:{{ ethereum_metrics_exporter_port}}:{{ ethereum_metrics_exporter_port }}/tcp
     command:
@@ -49,6 +63,13 @@ services:
     restart: unless-stopped
     image: {{ node_exporter_docker_image }}
     container_name: node-exporter
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     command:
       - '--path.rootfs=/host'
       - '--path.procfs=/host/proc'
@@ -72,6 +93,13 @@ services:
   cadvisor:
     image: {{ cadvisor_docker_image }}
     container_name: cadvisor
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     ports:
       - {{ host_ip_address_to_bind_to}}:8080:8080/tcp
     volumes:
