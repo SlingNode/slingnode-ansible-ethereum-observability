@@ -16,11 +16,16 @@ services:
     restart: "unless-stopped"
     image: {{ elk_docker_image }}
     container_name: {{ container_name_elk }}
+    restart: on-failure:5
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     ports:
       - "{{ host_ip_address_to_bind_to }}:5601:5601/tcp"  # Kibana
       - "{{ host_ip_address_to_bind_to }}:5044:5044/tcp"  # Logstash
       - "{{ host_ip_address_to_bind_to }}:9200:9200/tcp"  # ElasticSearch API
-      - "{{ host_ip_address_to_bind_to }}:9600:9600/tcp"  # Logstash API
     volumes:
       - {{ observability_root_path }}/elk/:/etc/logstash/conf.d/
       - elk-data:/var/lib/elasticsearch
@@ -36,6 +41,13 @@ services:
     restart: "unless-stopped"
     image: {{ prometheus_docker_image }}
     container_name: prometheus
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     volumes:
       - {{ observability_root_path }}/prometheus/prometheus.yml:/prometheus/prometheus.yml:ro
       - prom-data:/prometheus
@@ -61,6 +73,13 @@ services:
     restart: "unless-stopped"
     image: {{ grafana_docker_image }}
     container_name: grafana
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
     ports:
       - "{{ host_ip_address_to_bind_to }}:3000:3000/tcp"
     volumes:
