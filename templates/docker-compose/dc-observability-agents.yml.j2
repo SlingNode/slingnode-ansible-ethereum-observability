@@ -25,8 +25,7 @@ services:
       - no-new-privileges
     volumes:
       - {{ observability_root_path }}/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - {{ observability_root_path }}/filebeat/:/registry:rw
-      - {{ observability_root_path }}/filebeat/data:/usr/share/filebeat/data:rw
+      - filebeat-data:/usr/share/filebeat/data:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
@@ -119,3 +118,6 @@ services:
 networks:
   service_net:
     name: service_net
+
+volumes:
+  filebeat-data:

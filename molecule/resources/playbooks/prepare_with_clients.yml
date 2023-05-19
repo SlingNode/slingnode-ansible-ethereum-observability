@@ -25,4 +25,4 @@
 
     - name: Deploy Clients
       ansible.builtin.include_role:
-        name: "slingnode-ansible-ethereum-observability"
+        name: slingnode.ethereum
