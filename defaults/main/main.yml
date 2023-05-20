@@ -79,10 +79,8 @@ filebeat_config_template:
   - src: templates/filebeat/filebeat.yml.j2
     dest: "{{ observability_root_path }}/filebeat/filebeat.yml"
 
-# Use the below variables to provide your own Prometheus config files:
-prometheus_config_template:
-  - src: templates/prometheus/prometheus.yml.j2
-    dest: "{{ observability_root_path }}/prometheus/prometheus.yml"
+# Use the below variables to provide your own Prometheus config file:
+prometheus_config_template: templates/prometheus/prometheus.yml.j2
 
 # If you customized Prometheus config file and don't use Service Dicovery
 # set this variable to an empty list in your Playbook
@@ -91,6 +89,7 @@ prometheus_service_discovery_target_templates:
     dest: "{{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_all_targets_file }}"
   - src: templates/prometheus/{{ prometheus_service_discovery_client_targets_file }}.j2
     dest: "{{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_client_targets_file }}"
+
 
 prometheus_service_discovery_all_targets_file: sd_all_targets.yml
 prometheus_service_discovery_client_targets_file: sd_client_targets.yml
