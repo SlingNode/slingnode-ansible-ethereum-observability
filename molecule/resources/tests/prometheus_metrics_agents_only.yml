@@ -1,0 +1,21 @@
+## Prometheus checks
+- name: Check Prometheus is scraping the metrics from targets
+  ansible.builtin.uri:
+    # Get all metrics
+    url: "http://{{ 'localhost' if single_server_deployment else monitoring_server_host }}:9090/api/v1/label/__name__/values"
+    return_content: true
+    method: GET
+    status_code:
+      - 200
+  register: prometheus_metrics
+  retries: 20
+  delay: 3
+
+
+- name: Assert expected metrics are present in prometheus response
+  ansible.builtin.assert:
+    that:
+      # node-exporter
+      - "'node_cpu_seconds_total' in prometheus_metrics['content']"
+      # Container Advisor
+      - "'container_memory_rss' in prometheus_metrics['content']"

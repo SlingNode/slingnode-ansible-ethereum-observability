@@ -13,7 +13,6 @@ x-logging: &logging
 services:
 
   elk:
-    restart: "unless-stopped"
     image: {{ elk_docker_image }}
     container_name: {{ container_name_elk }}
     restart: on-failure:5
@@ -38,7 +37,6 @@ services:
           memory: {{ elk_container_memory_limit }}
 
   prometheus:
-    restart: "unless-stopped"
     image: {{ prometheus_docker_image }}
     container_name: prometheus
     restart: on-failure:5
@@ -49,12 +47,11 @@ services:
     security_opt:
       - no-new-privileges
     volumes:
-      - {{ observability_root_path }}/prometheus/prometheus.yml:/prometheus/prometheus.yml:ro
       - prom-data:/prometheus
-      # - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
       - /etc/localtime:/etc/localtime:ro
-      - /opt/observability/prometheus/sd_all_targets.yml:/prometheus/sd_all_targets.yml:ro
-      - /opt/observability/prometheus/sd_client_targets.yml:/prometheus/sd_client_targets.yml:ro
+      - {{ observability_root_path }}/prometheus/prometheus.yml:/prometheus/prometheus.yml:ro
+      - {{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_all_targets_file }}:/prometheus/{{ prometheus_service_discovery_all_targets_file }}:ro
+      - {{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_client_targets_file }}:/prometheus/{{ prometheus_service_discovery_client_targets_file }}:ro
     ports:
       - "{{ host_ip_address_to_bind_to }}:9090:9090/tcp"
     command:
@@ -70,7 +67,6 @@ services:
 
 
   grafana:
-    restart: "unless-stopped"
     image: {{ grafana_docker_image }}
     container_name: grafana
     restart: on-failure:5
