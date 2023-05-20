@@ -4,19 +4,29 @@
     name: ethereum-metrics-exporter
   register: ethereum_metrics_exporter_container
 
+
+- name: Get node-exporter container info
+  community.docker.docker_container_info:
+    name: node-exporter
+  register: node_exporter_container
+
+
 - name: Get cadvisor container info
   community.docker.docker_container_info:
     name: cadvisor
   register: cadvisor_container
+
 
 - name: Get filebeat container info
   community.docker.docker_container_info:
     name: filebeat
   register: filebeat_container
 
+
 - name: Assert observability agents containers are running
   ansible.builtin.assert:
     that:
       - ethereum_metrics_exporter_container.container.State.Status == "running"
+      - node_exporter_container.container.State.Status == "running"
       - cadvisor_container.container.State.Status == "running"
       - filebeat_container.container.State.Status == "running"
