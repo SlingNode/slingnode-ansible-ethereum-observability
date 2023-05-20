@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.4.0] - 2023-05-20
+
+### Changed
+
+- Parameterized Prometheus Service Discover file names
+- Lowered specs for Molecule test agent instances
+- Added test to verify that node exporter metrics from agents are present
+
+### Fixed
+
+- Removed duplicated 'restart' key from dc-observability.yml template
+
+
 ## [0.3.0] - 2023-05-19
 
 ### Changed
@@ -24,11 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added docker container hardening
 
+
 ## [0.1.1] - 2023-05-14
 
 ### Fixed
 
 - Set tags for docker images
+
 
 ## [0.1.0] - 2023-05-09
 
