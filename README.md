@@ -1,9 +1,9 @@
 # Ansible Role: Observability
 
-slingnode.ethereum_observability is an Ansible role that facilitates deployment of monitoring stack for the slingnode.ethereum Role. Its objective is to enable a consistent way of monitoring the chosen client mix in slingnode.ethereum. The role can be used to deploy:
+slingnode.ethereum_observability is an Ansible role that facilitates deployment of monitoring stack for Ethereum clients deployed using [slingnode.ethereum role](https://github.com/SlingNode/slingnode-ansible-ethereum). Its objective is to enable a consistent way of monitoring the chosen Ethereum client mix. The role can deploy a monitoring stack in two modes:
 
-* monitoring stack in a single server where all clients runs
-* monitoring stack on it own server monitoring clients deployed on a set of services
+* single server deployment - observability stack runs on the same server as the Ethereum clients
+* distributed - observability stack runs on a central server and monitors Ethereum clients over the network
 
 
 # Supported Operating Systems
@@ -25,7 +25,7 @@ Debian based:
 
 # Documentation
 
-The README file provides a basic overview only. Full documentation describing the role in details will be coming soon.
+The README file provides a basic overview only. Full documentation documentation is available at https://docs.slingnode.com/slingnode.ethereum_observability/
 
 # Requirements
 
@@ -67,7 +67,7 @@ Sample Playbook:
         docker_package_state: present
         docker_install_compose_plugin: true
 
-    - role: observability
+    - role: slingnode.ethereum_observability
 ```
 # Contact
 
