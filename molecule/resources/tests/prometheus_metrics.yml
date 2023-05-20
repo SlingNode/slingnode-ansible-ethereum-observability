@@ -18,6 +18,8 @@
       # ethereum-metrics-exporter
       - "'eth_con_node_version' in prometheus_metrics['content']"
       - "'eth_exe_web3_client_version' in prometheus_metrics['content']"
+      # node-exporter
+      - "'node_cpu_seconds_total' in prometheus_metrics['content']"
       # Container Advisor
       - "'container_memory_rss' in prometheus_metrics['content']"
       # execution - Geth - need to check other clients if this metrics is present

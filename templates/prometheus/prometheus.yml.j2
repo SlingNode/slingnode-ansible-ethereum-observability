@@ -7,11 +7,10 @@ scrape_configs:
 
 {% if single_server_deployment %}
 # single server deployment Targets are containers accessed over docker net
-# node-exporter not required in single server deploy, Prom already does that -confirm wit Javier
-  # - job_name: 'node_exporter'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['node-exporter:{{ node_exporter_port }}']
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['node-exporter:{{ node_exporter_port }}']
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:{{ container_advisor_port }}']
