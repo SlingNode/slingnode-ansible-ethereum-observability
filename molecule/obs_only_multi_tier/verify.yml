@@ -21,8 +21,13 @@
         file: ../resources/tests/health.yml
 
 
+    - name: Include prometheus metrics test tasks
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/prometheus_metrics_agents_only.yml
+
+
 - name: Verify - agents
-  hosts: slingnode-test-02
+  hosts: client_servers
   become: true
   gather_facts: true
 

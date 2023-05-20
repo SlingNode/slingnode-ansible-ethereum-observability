@@ -41,7 +41,7 @@ scrape_configs:
     scrape_interval: 5s
     file_sd_configs:
     - files:
-      - 'sd_all_targets.yml' #This path is relative
+      - '{{ prometheus_service_discovery_all_targets_file }}' #This path is relative
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
@@ -51,7 +51,7 @@ scrape_configs:
   - job_name: 'cadvisor'
     file_sd_configs:
     - files:
-      - 'sd_all_targets.yml' #This path is relative
+      - '{{ prometheus_service_discovery_all_targets_file }}' #This path is relative
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
@@ -61,7 +61,7 @@ scrape_configs:
   - job_name: 'ethereum-metrics-exporter'
     file_sd_configs:
     - files:
-      - 'sd_all_targets.yml' #This path is relative
+      - '{{ prometheus_service_discovery_all_targets_file }}' #This path is relative
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
@@ -79,5 +79,5 @@ scrape_configs:
         target_label: job
     file_sd_configs:
     - files:
-      - 'sd_client_targets.yml' #This path is relative
+      - '{{ prometheus_service_discovery_client_targets_file }}' #This path is relative
 {% endif %}

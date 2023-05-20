@@ -87,11 +87,13 @@ prometheus_config_template:
 # If you customized Prometheus config file and don't use Service Dicovery
 # set this variable to an empty list in your Playbook
 prometheus_service_discovery_target_templates:
-  - src: templates/prometheus/sd_all_targets.yml.j2
-    dest: "{{ observability_root_path }}/prometheus/sd_all_targets.yml"
-  - src: templates/prometheus/sd_client_targets.yml.j2
-    dest: "{{ observability_root_path }}/prometheus/sd_client_targets.yml"
+  - src: templates/prometheus/{{ prometheus_service_discovery_all_targets_file }}.j2
+    dest: "{{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_all_targets_file }}"
+  - src: templates/prometheus/{{ prometheus_service_discovery_client_targets_file }}.j2
+    dest: "{{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_client_targets_file }}"
 
+prometheus_service_discovery_all_targets_file: sd_all_targets.yml
+prometheus_service_discovery_client_targets_file: sd_client_targets.yml
 
 # Enabled will add the required rules firewall rules
 # Make sure you do not lose ssh access when enabling it
