@@ -52,7 +52,8 @@ Role variables are defined in 'defaults'. This means they have the lowest preced
 
 # Example playbook
 
-The best place to start is to check the examples project. There are multiple example playbooks ranging from a simple single node deployment to a distributed deployment of a large number of nodes. The examples project includes sample playbooks, inventories and group vars that you can adapt to your needs.
+The best place to start is to check the examples project. There are multiple example playbooks ranging from a simple single node deployment to a distributed deployment of a large number of nodes. The examples project includes sample playbooks, inventories and group vars that you can adapt to your needs. The examples project is available here [https://github.com/SlingNode/slingnode-ethereum-examples](https://github.com/SlingNode/slingnode-ethereum-examples)
+
 Sample Playbook:
 
 ```yaml
@@ -68,6 +69,8 @@ Sample Playbook:
         docker_install_compose_plugin: true
 
     - role: slingnode.ethereum_observability
+
+
 ```
 # Contact
 

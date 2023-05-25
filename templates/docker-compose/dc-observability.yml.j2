@@ -50,8 +50,10 @@ services:
       - prom-data:/prometheus
       - /etc/localtime:/etc/localtime:ro
       - {{ observability_root_path }}/prometheus/prometheus.yml:/prometheus/prometheus.yml:ro
+{% if prometheus_service_discovery_target_templates|length != 0 %}
       - {{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_all_targets_file }}:/prometheus/{{ prometheus_service_discovery_all_targets_file }}:ro
       - {{ observability_root_path }}/prometheus/{{ prometheus_service_discovery_client_targets_file }}:/prometheus/{{ prometheus_service_discovery_client_targets_file }}:ro
+{% endif %}
     ports:
       - "{{ host_ip_address_to_bind_to }}:9090:9090/tcp"
     command:
