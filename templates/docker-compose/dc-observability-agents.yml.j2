@@ -29,7 +29,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
-      - service_net
+      - "{{ docker_network }}"
     logging:
      driver: json-file
      options:
@@ -55,7 +55,7 @@ services:
       - --metrics-port={{ ethereum_metrics_exporter_port }}
     <<: *logging
     networks:
-      - service_net
+      - "{{ docker_network }}"
 
 
   node-exporter:
@@ -86,7 +86,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     <<: *logging
     networks:
-      - service_net
+      - "{{ docker_network }}"
 
 
   cadvisor:
@@ -113,11 +113,11 @@ services:
       - --housekeeping_interval=30s
     <<: *logging
     networks:
-      - service_net
+      - "{{ docker_network }}"
 
 networks:
-  service_net:
-    name: service_net
+  "{{ docker_network }}":
+    name: "{{ docker_network }}"
 
 volumes:
   filebeat-data:

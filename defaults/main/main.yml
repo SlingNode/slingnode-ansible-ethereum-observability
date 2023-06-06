@@ -14,6 +14,8 @@ ethereum_metrics_exporter_docker_image: ethpandaops/ethereum-metrics-exporter:0.
 node_exporter_docker_image: quay.io/prometheus/node-exporter:v1.5.0
 cadvisor_docker_image: gcr.io/cadvisor/cadvisor:v0.47.1
 
+docker_network: service_net
+
 container_name_elk: elk
 
 container_name_consensus: consensus
