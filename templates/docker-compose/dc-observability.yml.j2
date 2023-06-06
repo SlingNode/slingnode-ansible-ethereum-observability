@@ -30,7 +30,7 @@ services:
       - elk-data:/var/lib/elasticsearch
       - /etc/localtime:/etc/localtime:ro
     networks:
-      - service_net
+      - "{{ docker_network }}"
     deploy:
       resources:
         limits:
@@ -63,7 +63,7 @@ services:
       - --log.format=json
     <<: *logging
     networks:
-      - service_net
+      - "{{ docker_network }}"
     depends_on:
       - elk
 
@@ -88,11 +88,11 @@ services:
       - prometheus
     <<: *logging
     networks:
-      - service_net
+      - "{{ docker_network }}"
 
 networks:
-  service_net:
-    name: service_net
+  "{{ docker_network }}":
+    name: "{{ docker_network }}"
 
 
 volumes:
