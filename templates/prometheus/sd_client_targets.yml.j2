@@ -11,7 +11,7 @@
 
 # execution clients geth
 - targets:
-{% for host in groups['all'] if hostvars[host].clients.execution is defined and hostvars[host].clients.execution is defined == "geth" %}
+{% for host in groups['all'] if hostvars[host].clients.execution is defined and hostvars[host].clients.execution == "geth" %}
     - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ execution_client_metrics_port }}
 {% endfor %}
   labels:
@@ -21,7 +21,7 @@
 
 # execution clients nethermind and besu
 - targets:
-{% for host in groups['all'] if hostvars[host].clients.execution is defined %}
+{% for host in groups['all'] if hostvars[host].clients.execution is defined and hostvars[host].clients.execution != "geth"  %}
     - {{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }}:{{ execution_client_metrics_port }}
 {% endfor %}
   labels:
