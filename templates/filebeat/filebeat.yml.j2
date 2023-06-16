@@ -13,12 +13,30 @@ filebeat.autodiscover:
                   docker.container.labels.slingnode_client: nethermind
               - equals:
                   docker.container.labels.slingnode_client: teku
+              - equals:
+                  docker.container.labels.slingnode_client: lodestar
           config:
             - type: container
               paths:
                 - /var/lib/docker/containers/${data.docker.container.id}/*.log
               multiline.type: pattern
               multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+              multiline.negate: true
+              multiline.match: after
+              fields:
+                log_type: docker
+              fields_under_root: true
+        # Lodestar throw multiline exceptions, Filebeat needs multiline config to handle it
+        - condition:
+            or:
+              - equals:
+                  docker.container.labels.slingnode_client: lodestar
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              multiline.type: pattern
+              multiline.pattern: '^Error:|^[[:space:]]+'
               multiline.negate: true
               multiline.match: after
               fields:
