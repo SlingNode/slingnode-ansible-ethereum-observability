@@ -4,15 +4,15 @@ install_monitoring_agents: true
 single_server_deployment: true
 
 # monitoring server images
-elk_docker_image: sebp/elk:8.6.2
-prometheus_docker_image: prom/prometheus:v2.44.0
-grafana_docker_image: grafana/grafana:9.5.1
+elk_docker_image: sebp/elk:8.7.1
+prometheus_docker_image: prom/prometheus:v2.46.0
+grafana_docker_image: grafana/grafana:10.0.3
 
 # monitoring agent images
-filebeat_docker_image: docker.elastic.co/beats/filebeat:8.7.0
+filebeat_docker_image: docker.elastic.co/beats/filebeat:8.9.0
 ethereum_metrics_exporter_docker_image: ethpandaops/ethereum-metrics-exporter:0.21.0
-node_exporter_docker_image: quay.io/prometheus/node-exporter:v1.5.0
-cadvisor_docker_image: gcr.io/cadvisor/cadvisor:v0.47.1
+node_exporter_docker_image: quay.io/prometheus/node-exporter:v1.6.1
+cadvisor_docker_image: gcr.io/cadvisor/cadvisor:v0.47.2
 
 docker_network: service_net
 

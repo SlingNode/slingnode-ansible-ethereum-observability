@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2023-07-30
+
+### Updated
+
+- Updated elk image from 8.6.2 to 8.7.1
+- Updated prometheus image from v2.44.0 to v2.46.0
+- Updated grafana image from 9.5.1 to 10.0.3
+- Updated filebeat image from 8.7.0 to 8.9.0
+- Updated node-exporter image from v1.5.0 to v1.6.1
+- Updated cadvisor image from v0.47.1 to v0.47.2
+
 ## [0.6.0] - 2023-06-23
 
 ### Added
