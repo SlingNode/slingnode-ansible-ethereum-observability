@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2023-11-20
+
+### Updated
+
+- Updated elk image from 8.7.1 to 8.9.1
+- Updated prometheus image from v2.46.0 to v2.48.0
+- Updated grafana image from 10.0.3 to 10.2.1
+- Updated filebeat image from 8.9.0 to 8.11.1
+- Updated node-exporter image from v1.6.1 to v1.7.0
+- Updated ethereum-metrics-exporter image from 0.21.0 to 0.22.0
+
 ## [0.7.0] - 2023-07-30
 
 ### Updated
