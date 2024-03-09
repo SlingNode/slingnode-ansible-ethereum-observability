@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2024-03-09
+
+### Fixed
+
+- Updated community.docker.docker_compose to community.docker.docker_compose_v2
+- Updated community.docker collection
+- Fixed docker-compose files Bug with duplication restart policy
+- Updated geerlingguy.docker for tests
+
 ## [0.8.0] - 2023-11-20
 
 ### Updated

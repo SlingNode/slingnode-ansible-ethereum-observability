@@ -37,7 +37,6 @@ services:
       max-file: "3"
 
   ethereum-metrics-exporter:
-    restart: "unless-stopped"
     image: {{ ethereum_metrics_exporter_docker_image }}
     container_name: ethereum-metrics-exporter
     restart: on-failure:5
@@ -59,7 +58,6 @@ services:
 
 
   node-exporter:
-    restart: unless-stopped
     image: {{ node_exporter_docker_image }}
     container_name: node-exporter
     restart: on-failure:5
